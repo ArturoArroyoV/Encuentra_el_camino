@@ -8,6 +8,13 @@ public class RelojTiempo {
         this.x = x;
         this.y = y;
     }
+    public void dibujar (Graphics g) {
+        g.setColor (Color.GREEN);
+        g.fillRect(x,y,TAMANO,TAMANO)
+            }
+    public Rectangle getBounds() {
+        return new Rectangle (x,y,TAMANO, TAMANO)
+        }
     
     
 }
