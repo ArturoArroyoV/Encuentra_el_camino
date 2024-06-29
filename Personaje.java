@@ -6,4 +6,24 @@ public class Personaje {
         this.x = x;
         this.y = y;
     }
+    public void dibujar(Graphics g) {
+        g.setColor(Color.BLUE);
+        g.fillRect(x, y, TAMANO, TAMANO);
+    }
+
+    public void moverArriba() {
+        y -= TAMANO;
+    }
+
+    public void moverAbajo() {
+        y += TAMANO;
+    }
+
+    public void moverIzquierda() {
+        x -= TAMANO;
+    }
+
+    public void moverDerecha() {
+        x += TAMANO;
+    }
 }
