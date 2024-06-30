@@ -1,37 +1,32 @@
 import java.awt.*;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class Temporizador {
     private int tiempoRestante;
-    private Timer timer;
 
     public Temporizador(int tiempoInicial) {
-        this.tiempoRestante = tiempoInicial;
-        this.timer = new Timer();
-        iniciarTemporizador();
+        tiempoRestante = tiempoInicial;
     }
 
-    private void iniciarTemporizador() {
-        timer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                if (tiempoRestante > 0) {
-                    tiempoRestante--;
-                } else {
-                    timer.cancel();
-                    // Lógica cuando el tiempo se acaba (e.g., reiniciar nivel)
-                }
-            }
-        }, 1000, 1000);
+    public void decrementar() {
+        if (tiempoRestante > 0) {
+            tiempoRestante--;
+        }
     }
 
-    public void agregarTiempo(int segundos) {
-        tiempoRestante += segundos;
+    public void agregarTiempo(int tiempo) {
+        tiempoRestante += tiempo;
+    }
+
+    public int getTiempoRestante() {
+        return tiempoRestante;
+    }
+
+    public void reiniciar() {
+        tiempoRestante = 40;
     }
 
     public void dibujar(Graphics g) {
         g.setColor(Color.RED);
-        g.drawString("Tiempo: " + tiempoRestante, 10, 30);
+        g.drawString("Tiempo Restante: " + tiempoRestante, 10, 10);
     }
 }

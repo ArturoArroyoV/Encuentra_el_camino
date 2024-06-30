@@ -1,18 +1,38 @@
+import java.awt.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AFD {
-    private final int [][] tablaTransiciones;
-    this.estadoActual = 0;
+    private String estadoActual;
+    private Map<String, Map<String, String>> transiciones;
 
-public AFD( int [][] tablaTransiciones) {
-    this.tablaTransiciones = tablaTransiciones;
-    this.estadoActual = 0;
+    public AFD() {
+        estadoActual = "Q0";
+        transiciones = new HashMap<>();
+        definirTransiciones();
     }
-public void transicionar(int entrada){
-    estadoActual = tablaTransiciones[estadoActual][entrada];
-}
-public void dibujar (Graphics g){
-    //Dibujar los estados y transiciones del AFD
-    g.setColor(Color.RED);
-    g.drawString("Estado actual: " + estadoActual, 10, 20);
+
+    private void definirTransiciones() {
+        agregarTransicion("Q0", "mover", "Q1");
+        agregarTransicion("Q1", "mover", "Q2");
+        agregarTransicion("Q2", "mover", "Q3");
+        agregarTransicion("Q3", "finDelNivel", "Q4");
+        agregarTransicion("Q4", "nuevoNivel", "Q0");
+    }
+
+    private void agregarTransicion(String estadoActual, String accion, String nuevoEstado) {
+        transiciones.putIfAbsent(estadoActual, new HashMap<>());
+        transiciones.get(estadoActual).put(accion, nuevoEstado);
+    }
+
+    public void transitar(String accion) {
+        if (transiciones.containsKey(estadoActual) && transiciones.get(estadoActual).containsKey(accion)) {
+            estadoActual = transiciones.get(estadoActual).get(accion);
+        }
+    }
+
+    public void dibujar(Graphics g) {
+        g.setColor(Color.GREEN);
+        g.drawString("Estado Actual: " + estadoActual, 10, 30);
     }
 }
