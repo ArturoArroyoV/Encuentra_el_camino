@@ -14,8 +14,11 @@ public class AFD {
 
     private void definirTransiciones() {
         agregarTransicion("Q0", "mover", "Q1");
-        agregarTransicion("Q1", "mover", "Q2");
-        agregarTransicion("Q2", "mover", "Q3");
+        agregarTransicion("Q1", "mover", "Q1");
+        agregarTransicion("Q1", "finDelNivel", "Q4");
+        agregarTransicion("Q1", "recogerReloj", "Q2");
+        agregarTransicion("Q1", "puntoDeControl", "Q3");
+        agregarTransicion("Q2", "puntoDeControl", "Q3");
         agregarTransicion("Q3", "finDelNivel", "Q4");
         agregarTransicion("Q4", "nuevoNivel", "Q0");
     }
@@ -31,8 +34,8 @@ public class AFD {
         }
     }
 
-    public void dibujar(Graphics g) {
-        g.setColor(Color.GREEN);
-        g.drawString("Estado Actual: " + estadoActual, 10, 30);
+    public void dibujar(Graphics g, int x, int y) {
+        g.setColor(Color.RED);
+        g.drawString("Estado Actual: " + estadoActual, x, y);
     }
 }
