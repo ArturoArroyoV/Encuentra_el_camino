@@ -72,16 +72,49 @@ public class PanelJuego extends JPanel {
         personaje = new Personaje(1, 1); // Ubicación inicial del personaje
         temporizador = new Temporizador(40); // Tiempo inicial de 40 segundos
         afd = new AFD(); // Inicializar el AFD
-        puntoDeControl = null;
+        if (puntoDeControl != null) {
+            laberinto.setPuntoDeControl(puntoDeControl);
+            } else {
+            puntoDeControl = laberinto.generarPuntoDeControl();
+            }
+        if(timer != null) {
+        time.restart();
+            }
     }
+
+    private void mostrarMensaje(String mensaje) {
+        int opcion = JOptionPane.showOptionDialog(this, mensaje, "Mensaje", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE,
+                null, new Object[]{"Reiniciar", "Rendirse"}, JOptionPane.YES_OPTION);
+        if (opcion == JOptionPane.YES_OPTION) {
+            inicializarNivel();
+            } else {
+            System.exit(0);
+            }
+        }
+    private void actualizarVision(){
+        int px = personaje.getX();
+        int py = personaje.getY();
+        laberinto.marcarVisitada(px,py);
+        for(int i =-2; i<=2; i++) {
+            for ( int j = -2; j<=2 ; j++) {
+                if(px + i >= 0 && px + i < laberinto.getFilas() && py + j >= 0 && py + j < laberinto.getColumnas()){
+                    laberinto.marcarVisitada (px + i, py + j);
+                    }
+                }
+            }
+        }
+                                                  
+            
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        laberinto.dibujar(g);
+        actualizarVision();
+        laberinto.dibujar(g, personaje.getX(), personaje.getY());
         personaje.dibujar(g);
-        temporizador.dibujar(g);
-        afd.dibujar(g);
+        // Mover la posición de los textos del AFD y el temporizador
+        temporizador.dibujar(g, 400, 50);
+        afd.dibujar(g, 400, 30);
     }
 
     public static void main(String[] args) {
