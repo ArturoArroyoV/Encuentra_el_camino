@@ -9,7 +9,7 @@ public class PanelJuego extends JPanel {
     private Temporizador temporizador;
     private AFD afd;
     private Point puntoDeControl;
-    private boolean reiniciarNivel;
+    private Timer timer;
 
     public PanelJuego() {
         inicializarNivel();
