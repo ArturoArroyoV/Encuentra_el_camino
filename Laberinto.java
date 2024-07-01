@@ -3,49 +3,50 @@ import java.util.Random;
 import java.util.Stack;
 
 public class Laberinto {
+    private static final int PARED = 0;
+    private static final int CAMINO = 1;
+    private static final int INICIO = 2;
+    private static final int FIN = 3;
+    private static final int RELOJ = 4;
+    private static final int PUNTO_DE_CONTROL = 5;
+
+    private int[][] grid;
     private int filas;
     private int columnas;
-    private int[][] grid;
-    private final int CAMINO = 0;
-    private final int PARED = 1;
-    private final int INICIO = 2;
-    private final int FIN = 3;
-    private final int RELOJ = 4;
-    private final int PUNTO_DE_CONTROL = 5;
+    private boolean[][] visitadas;
 
     public Laberinto(int filas, int columnas) {
         this.filas = filas;
         this.columnas = columnas;
         grid = new int[filas][columnas];
+        visitadas = new boolean[filas][columnas];
         generarLaberinto();
     }
 
-    private void generarLaberinto() {
-        // Inicializar todo el grid como paredes
-        for (int i = 0; i < filas; i++) {
-            for (int j = 0; j < columnas; j++) {
-                grid[i][j] = PARED;
-            }
-        }
-        // Definir la posición inicial y final
-        grid[1][1] = INICIO;
-        grid[filas - 2][columnas - 2] = FIN;
+    public int getFilas() {
+        return filas;
+    }
 
-        // Usar un algoritmo de backtracking para generar el laberinto
+    public int getColumnas() {
+        return columnas;
+    }
+
+    private void generarLaberinto() {
         Stack<Point> stack = new Stack<>();
         stack.push(new Point(1, 1));
+        grid[1][1] = CAMINO;
 
         while (!stack.isEmpty()) {
-            Point current = stack.peek();
-            int x = current.x;
-            int y = current.y;
+            Point actual = stack.peek();
+            int x = actual.x;
+            int y = actual.y;
 
-            // Obtener vecinos no visitados
             Point[] vecinos = obtenerVecinosNoVisitados(x, y);
             if (vecinos.length > 0) {
                 Point vecino = vecinos[new Random().nextInt(vecinos.length)];
                 int nx = vecino.x;
                 int ny = vecino.y;
+
                 grid[nx][ny] = CAMINO;
                 grid[(x + nx) / 2][(y + ny) / 2] = CAMINO;
                 stack.push(vecino);
@@ -53,22 +54,51 @@ public class Laberinto {
                 stack.pop();
             }
         }
-
-        // Colocar el reloj en un lugar aleatorio en el camino
-        colocarElementoAleatorio(RELOJ);
-
-        // Colocar el punto de control en un lugar aleatorio en el camino
-        colocarElementoAleatorio(PUNTO_DE_CONTROL);
+        colocarRelojes();
+        colocarFin();
     }
 
-    private void colocarElementoAleatorio(int elemento) {
+    private void colocarRelojes() {
+        int numRelojes = (filas * columnas) / 50;
+        Random rand = new Random();
+        for (int i = 0; i < numRelojes; i++) {
+            int x, y;
+            do {
+                x = rand.nextInt(filas - 2) + 1;
+                y = rand.nextInt(columnas - 2) + 1;
+            } while (!esCamino(x, y) || tieneCaminosDetras(x, y));
+            grid[x][y] = RELOJ;
+        }
+    }
+
+    private void colocarFin() {
         Random rand = new Random();
         int x, y;
         do {
-            x = rand.nextInt(filas);
-            y = rand.nextInt(columnas);
-        } while (grid[x][y] != CAMINO);
-        grid[x][y] = elemento;
+            x = rand.nextInt(filas - 2) + 1;
+            y = rand.nextInt(columnas - 2) + 1;
+        } while (!esCamino(x, y) || tieneCaminosDetras(x, y) || (x == 1 && y == 1));
+        grid[x][y] = FIN;
+    }
+
+    public Point generarPuntoDeControl() {
+        Random rand = new Random();
+        int x, y;
+        do {
+            x = rand.nextInt(filas - 2) + 1;
+            y = rand.nextInt(columnas - 2) + 1;
+        } while (!esCamino(x, y) || tieneCaminosDetras(x, y));
+        grid[x][y] = PUNTO_DE_CONTROL;
+        return new Point(x, y);
+    }
+
+    public void setPuntoDeControl(Point puntoDeControl) {
+        grid[puntoDeControl.x][puntoDeControl.y] = PUNTO_DE_CONTROL;
+    }
+
+    private boolean tieneCaminosDetras(int x, int y) {
+        return (x > 1 && grid[x - 2][y] == CAMINO) || (x < filas - 2 && grid[x + 2][y] == CAMINO) ||
+                (y > 1 && grid[x][y - 2] == CAMINO) || (y < columnas - 2 && grid[x][y + 2] == CAMINO);
     }
 
     private Point[] obtenerVecinosNoVisitados(int x, int y) {
@@ -94,61 +124,77 @@ public class Laberinto {
     }
 
     public boolean esCamino(int x, int y) {
-        return grid[x][y] == CAMINO || grid[x][y] == INICIO || grid[x][y] == FIN;
-    }
-
-    public boolean esFin(int x, int y) {
-        return grid[x][y] == FIN;
+        return grid[x][y] == CAMINO || grid[x][y] == INICIO || grid[x][y] == FIN || grid[x][y] == RELOJ || grid[x][y] == PUNTO_DE_CONTROL;
     }
 
     public boolean esReloj(int x, int y) {
         return grid[x][y] == RELOJ;
     }
 
-    public boolean esPuntoDeControl(int x, int y) {
-        return grid[x][y] == PUNTO_DE_CONTROL;
-    }
-
     public void removerReloj(int x, int y) {
-        if (grid[x][y] == RELOJ) {
+        if (esReloj(x, y)) {
             grid[x][y] = CAMINO;
         }
     }
 
-    public void dibujar(Graphics g) {
-        int ancho = getWidth() / columnas;
-        int alto = getHeight() / filas;
-        for (int i = 0; i < filas; i++) {
-            for (int j = 0; j < columnas; j++) {
-                if (grid[i][j] == PARED) {
-                    g.setColor(Color.WHITE); // Pared
-                } else if (grid[i][j] == CAMINO || grid[i][j] == INICIO) {
-                    g.setColor(Color.BLACK); // Camino
-                } else if (grid[i][j] == FIN) {
-                    g.setColor(Color.GREEN); // Fin del nivel
-                } else if (grid[i][j] == RELOJ) {
-                    g.setColor(Color.MAGENTA); // Reloj
-                } else if (grid[i][j] == PUNTO_DE_CONTROL) {
-                    g.setColor(Color.YELLOW); // Punto de control
-                }
-                g.fillRect(j * ancho, i * alto, ancho, alto);
-            }
+    public boolean esPuntoDeControl(int x, int y) {
+        return grid[x][y] == PUNTO_DE_CONTROL;
+    }
+
+    public void removerPuntoDeControl(int x, int y) {
+        if (esPuntoDeControl(x, y)) {
+            grid[x][y] = CAMINO;
         }
     }
 
-    public int getFilas() {
-        return filas;
+    public boolean esFin(int x, int y) {
+        return grid[x][y] == FIN;
     }
 
-    public int getColumnas() {
-        return columnas;
+    public void marcarVisitada(int x, int y) {
+        visitadas[x][y] = true;
     }
 
-    private int getWidth() {
-        return 500;
+    public boolean esVisitada(int x, int y) {
+        return visitadas[x][y];
     }
 
-    private int getHeight() {
-        return 500;
+    public void dibujar(Graphics g, int personajeX, int personajeY) {
+        int tileSize = 20;
+        int rangoVision = 2;
+
+        for (int i = 0; i < filas; i++) {
+            for (int j = 0; j < columnas; j++) {
+                if (Math.abs(i - personajeX) <= rangoVision && Math.abs(j - personajeY) <= rangoVision) {
+                    visitadas[i][j] = true;
+                }
+
+                if (visitadas[i][j]) {
+                    switch (grid[i][j]) {
+                        case CAMINO:
+                            g.setColor(Color.WHITE);
+                            break;
+                        case PARED:
+                            g.setColor(Color.BLACK);
+                            break;
+                        case INICIO:
+                            g.setColor(Color.GREEN);
+                            break;
+                        case FIN:
+                            g.setColor(Color.RED);
+                            break;
+                        case RELOJ:
+                            g.setColor(Color.YELLOW);
+                            break;
+                        case PUNTO_DE_CONTROL:
+                            g.setColor(Color.BLUE);
+                            break;
+                    }
+                } else {
+                    g.setColor(Color.GRAY);
+                }
+                g.fillRect(j * tileSize, i * tileSize, tileSize, tileSize);
+            }
+        }
     }
 }
