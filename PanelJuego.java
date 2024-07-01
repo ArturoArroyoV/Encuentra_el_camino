@@ -27,17 +27,24 @@ public class PanelJuego extends JPanel {
                 if (laberinto.esReloj(personaje.getX(), personaje.getY())) {
                     temporizador.agregarTiempo(5); // Añadir 5 segundos al tiempo
                     laberinto.removerReloj(personaje.getX(), personaje.getY());
+                    afd.transitar("recogerReloj");
                 }
                 
                 if (laberinto.esPuntoDeControl(personaje.getX(), personaje.getY())) {
                     puntoDeControl = new Point(personaje.getX(), personaje.getY());
+                    laberinto.removerPuntoDeControl(personaje.getX(), personaje.getY());
+                    afd.transitar("puntoDeControl");
+                }else {
+                    afd.transitar("mover");// Actualizar el estado del AFD
                 }
 
-                afd.transitar("mover"); // Actualizar el estado del AFD
 
                 if (laberinto.esFin(personaje.getX(), personaje.getY())) {
                     afd.transitar("finDelNivel");
-                    inicializarNivel(); // Reiniciar nivel al completarlo
+                    temporizador.pausar();
+                    timer.stop();  // Detener el temporizador
+                    mostrarMensaje("¡Felicitaciones runner, completaste el laberinto!");
+                
                 }
 
                 repaint();
@@ -53,6 +60,7 @@ public class PanelJuego extends JPanel {
                     inicializarNivel();
                 }
                 temporizador.reiniciar();
+                mostrarMensaje("Game Over");
             }
             repaint();
         });
